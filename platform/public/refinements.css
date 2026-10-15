@@ -1,0 +1,2 @@
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px}.metrics small{display:block;color:var(--muted)}.metrics strong{font-size:21px}.drone-card .section-head{padding:0 0 12px}.record-title{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.slots{flex-wrap:wrap}.leaflet-container img{max-width:none}#map{isolation:isolate}.summary strong{overflow-wrap:anywhere}.map-panel{min-width:0}
+[hidden]{display:none!important}

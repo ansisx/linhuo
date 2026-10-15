@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><script>if(location.protocol==="file:")location.replace("http://127.0.0.1:8790");</script><meta name="viewport" content="width=device-width,initial-scale=1"><title>林域 · 森林消防工作台</title><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/refinements.css"><link rel="stylesheet" href="/cockpit.css"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"></head>
+<body>
+<header><div class="brand"><span class="logo">林</span><div><h1>林域 <span>森林消防工作台</span></h1></div><span class="build-label">布局预览</span></div><div class="header-right"><span id="clock"></span><a id="demo-link" href="/?demo=1">演示</a><button id="device-settings">设备设置</button><button id="stop">退出平台</button></div></header>
+<section class="status-strip" aria-label="连接状态">
+<span class="status-item">巡检遥测 <strong id="patrol-status" data-state="idle">未连接</strong></span>
+<span class="status-item">巡检视频 <strong id="patrol-video-badge" data-state="idle">未连接</strong></span>
+<span class="status-item">灭火遥测 <strong id="suppression-status" data-state="idle">未连接</strong></span>
+<span class="status-item">灭火视频 <strong id="suppression-video-badge" data-state="idle">未连接</strong></span>
+<span class="status-item">航线 <strong id="sync-badge" data-state="idle">等待同步</strong></span>
+<span id="ingest-status" hidden></span>
+</section>
+<div class="notice" id="notice" hidden></div>
+<main class="cockpit">
+<section class="map-panel panel">
+<div class="section-head"><h2>态势地图</h2><div class="tools"><select id="map-source" aria-label="地图源"><option value="esri">卫星影像</option><option value="tdt">天地图</option><option value="osm">普通地图</option></select><button id="fit" title="显示全部飞机与航线">定位全部</button></div></div>
+<div id="map"><div class="map-empty">地图加载中…</div></div>
+<p id="map-message" class="muted" hidden></p>
+<div class="map-footer"><span><i class="dot patrol"></i>巡检机</span><span><i class="dot suppression"></i>灭火机</span><span><i class="dot fire"></i>火点</span></div>
+<aside class="fleet"><article class="drone-card" id="patrol-card"></article><article class="drone-card" id="suppression-card"></article></aside>
+</section>
+<section class="video-grid" aria-label="双机视频">
+<article class="panel video-panel patrol-panel"><div class="section-head"><h2>巡检机 <small>识别画面</small></h2><div><button data-expand="patrol" title="放大巡检视频">放大</button><button data-local-connect="patrol">连接</button></div></div><div id="patrol-video" class="video-slot"></div></article>
+<article class="panel video-panel suppression-panel"><div class="section-head"><h2>灭火机 <small>实时画面</small></h2><div><button data-expand="suppression" title="放大灭火视频">放大</button><button data-local-connect="suppression">连接</button></div></div><div id="suppression-video" class="video-slot"></div></article>
+</section>
+<aside class="panel side-dock">
+<nav class="dock-tabs" role="tablist" aria-label="工作面板">
+<button id="tab-events" role="tab" aria-selected="true" aria-controls="view-events" data-view="events">告警 <span id="event-count">0</span></button>
+<button id="tab-plans" role="tab" aria-selected="false" aria-controls="view-plans" data-view="plans" tabindex="-1">航线</button>
+<button id="tab-tasks" role="tab" aria-selected="false" aria-controls="view-tasks" data-view="tasks" tabindex="-1">任务 <span id="task-count">0</span></button>
+<button id="tab-records" role="tab" aria-selected="false" aria-controls="view-records" data-view="records" tabindex="-1">记录</button>
+</nav>
+<section id="view-events" role="tabpanel" aria-labelledby="tab-events" class="dock-view"><div class="section-head"><h2>火源告警</h2><button id="new-event">登记</button></div><div id="events" class="record-list"></div></section>
+<section id="view-plans" role="tabpanel" aria-labelledby="tab-plans" class="dock-view" hidden><div class="section-head"><h2>规划航线</h2><button id="open-sync">同步设置</button></div><div id="route-list" class="record-list"></div><div class="plan-bar"><select id="plan-drone" aria-label="规划所属无人机"><option value="patrol">巡检机</option><option value="suppression">灭火机</option></select><label class="button">手动导入<input id="plan-file" type="file" accept=".plan,application/json" hidden></label><span id="plan-summary"></span></div></section>
+<section id="view-tasks" role="tabpanel" aria-labelledby="tab-tasks" class="dock-view" hidden><div class="section-head"><h2>灭火任务</h2><span class="tag amber">人工交接</span></div><div id="tasks" class="record-list"></div></section>
+<section id="view-records" role="tabpanel" aria-labelledby="tab-records" class="dock-view" hidden><div class="section-head"><h2>检测与操作记录</h2></div><div class="records-scroll"><div id="detection-records-host"></div><details class="audit"><summary>操作记录</summary><div id="audit"></div></details></div></section>
+</aside>
+</main>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+<dialog id="device-dialog"><div class="dialog-heading"><h2>设备设置</h2><button data-dismiss="device-dialog" aria-label="关闭设备设置">✕</button></div><nav class="settings-nav"><button id="open-video" class="primary">视频连接</button><button id="open-telemetry">遥测接口</button><button id="device-sync">航线同步</button><button id="map-key">地图密钥</button><button id="access">访问密钥</button></nav><div id="video-settings-host"></div></dialog>
+<dialog id="sync-dialog"><div class="dialog-heading"><h2>航线同步设置</h2><button data-dismiss="sync-dialog" aria-label="关闭航线同步设置">✕</button></div><div id="sync-settings-host"></div></dialog>
+<dialog id="config-dialog"><form id="config-form"><h2 id="config-title">接入设置</h2><input id="config-role" type="hidden"><label>PX4 MAVLink 系统编号<input id="system-id" type="number" min="1" max="254" required value="1"></label><label>视频播放页面 URL<input id="video-url" type="url" placeholder="https://媒体服务器/patrol-annotated"></label><p class="muted">填写 MediaMTX 等服务提供的 WebRTC/HLS 播放网页地址，不是 RTSP 地址或原始 .m3u8。不会自动测试或保证该流在线。QGC 使用独立 RTSP 输出。</p><div class="dialog-actions"><button type="button" data-close="config-dialog">取消</button><button class="primary">保存设置</button></div></form></dialog>
+<dialog id="event-dialog"><form id="event-form"><h2>登记疑似火点</h2><label>事件描述<input id="event-label" required maxlength="80" value="疑似森林火源"></label><label>识别置信度（可留空，0–1）<input id="event-confidence" type="number" min="0" max="1" step="0.01"></label><div class="input-row"><label>火点纬度<input id="event-lat" type="number" min="-90" max="90" step="any"></label><label>火点经度<input id="event-lng" type="number" min="-180" max="180" step="any"></label></div><label>定位误差半径（米，有坐标时必填）<input id="event-error" type="number" min="0" step="any"></label><label>定位依据／现场备注<textarea id="event-note" maxlength="500" required placeholder="例如：人工对照地标；仅图像识别尚无地面坐标"></textarea></label><p class="muted">坐标为 WGS84 火点地面坐标，不是巡检机自身坐标。无定位也可登记，但不能创建灭火任务。</p><div class="dialog-actions"><button type="button" data-close="event-dialog">取消</button><button class="primary">登记</button></div></form></dialog>
+
+<script type="module" src="/app.js"></script><script type="module" src="/connections-ui.js"></script><script type="module" src="/detection-ui.js"></script><script type="module" src="/plan-sync-ui.js"></script><script type="module" src="/cockpit.js"></script></body></html>
